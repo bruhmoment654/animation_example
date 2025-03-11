@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'dart:math' as math;
-
 class ArrowAnimatationWidget extends StatefulWidget {
   const ArrowAnimatationWidget({super.key});
 
@@ -13,6 +11,8 @@ class _ArrowAnimatationWidgetState extends State<ArrowAnimatationWidget>
     with SingleTickerProviderStateMixin {
   late final Animation<double> animation;
 
+  late final Animation<Color?> colorAnimation;
+
   @override
   void initState() {
     super.initState();
@@ -22,23 +22,46 @@ class _ArrowAnimatationWidgetState extends State<ArrowAnimatationWidget>
         period: const Duration(seconds: 1),
       );
 
-    animation = CurvedAnimation(parent: controller, curve:  const Cubic(.18,-1.06,0,.43));
+    animation = controller;
+    colorAnimation =
+        ColorTween(begin: Colors.red, end: Colors.blue).animate(animation);
 
+    controller.repeat(reverse: true, period: const Duration(seconds: 1));
   }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: AnimatedBuilder(
-        animation: animation,
-        builder: (_, __) => Transform.rotate(
-          angle: math.pi * animation.value * 2,
-          child: const Icon(
-            Icons.autorenew,
-            size: 100,
-          ),
+      child: SizedBox(
+        width: 200,
+        height: 200,
+        child: CustomPaint(
+          painter: TestCustomPatiner(color: colorAnimation, width: animation),
         ),
       ),
     );
   }
+}
+
+class TestCustomPatiner extends CustomPainter {
+  final Animation<Color?> color;
+  final Animation<double> width;
+
+  TestCustomPatiner({
+    required this.color,
+    required this.width,
+  }) : super(repaint: color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color.value ?? Colors.white;
+
+    canvas.drawRect(
+      Offset.zero & Size(width.value * size.width, 100),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
