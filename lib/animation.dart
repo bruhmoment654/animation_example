@@ -9,26 +9,6 @@ class ArrowAnimatationWidget extends StatefulWidget {
 
 class _ArrowAnimatationWidgetState extends State<ArrowAnimatationWidget>
     with SingleTickerProviderStateMixin {
-  late final Animation<double> animation;
-
-  late final Animation<Color?> colorAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final controller = AnimationController(vsync: this)
-      ..repeat(
-        period: const Duration(seconds: 1),
-      );
-
-    animation = controller;
-    colorAnimation =
-        ColorTween(begin: Colors.red, end: Colors.blue).animate(animation);
-
-    controller.repeat(reverse: true, period: const Duration(seconds: 1));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -36,7 +16,7 @@ class _ArrowAnimatationWidgetState extends State<ArrowAnimatationWidget>
         width: 200,
         height: 200,
         child: CustomPaint(
-          painter: TestCustomPatiner(color: colorAnimation, width: animation),
+          painter: TestCustomPatiner(),
         ),
       ),
     );
@@ -44,22 +24,38 @@ class _ArrowAnimatationWidgetState extends State<ArrowAnimatationWidget>
 }
 
 class TestCustomPatiner extends CustomPainter {
-  final Animation<Color?> color;
-  final Animation<double> width;
-
-  TestCustomPatiner({
-    required this.color,
-    required this.width,
-  }) : super(repaint: color);
+  TestCustomPatiner();
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color.value ?? Colors.white;
+    final textPainter = TextPainter(
+        text: const TextSpan(
+          text: 'VENOM',
+          style: TextStyle(fontSize: 60, color: Colors.black),
+        ),
+        textDirection: TextDirection.ltr)
+      ..layout();
 
-    canvas.drawRect(
-      Offset.zero & Size(width.value * size.width, 100),
-      paint,
+    final textSize = Size(textPainter.width, textPainter.height);
+
+    final center = Offset(size.width / 2, size.height / 2).translate(
+      -textSize.width / 2,
+      -textSize.height / 2,
     );
+
+    final textRect = center & textSize;
+
+    canvas.saveLayer(textRect, Paint());
+
+    textPainter.paint(canvas, center);
+
+    canvas.saveLayer(textRect, Paint()..blendMode = BlendMode.srcATop);
+
+    canvas.drawPaint(Paint()..color = Colors.red);
+
+    canvas.restore();
+
+    canvas.restore();
   }
 
   @override
