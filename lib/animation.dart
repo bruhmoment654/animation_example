@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'dart:math';
 
-import 'dart:math' as math;
+import 'package:flutter/material.dart';
 
 class ArrowAnimatationWidget extends StatefulWidget {
   const ArrowAnimatationWidget({super.key});
@@ -9,34 +9,39 @@ class ArrowAnimatationWidget extends StatefulWidget {
   State<ArrowAnimatationWidget> createState() => _ArrowAnimatationWidgetState();
 }
 
-class _ArrowAnimatationWidgetState extends State<ArrowAnimatationWidget>
-    with SingleTickerProviderStateMixin {
-  late final Animation<double> animation;
+class _ArrowAnimatationWidgetState extends State<ArrowAnimatationWidget> {
+  double size = 100;
+  int selectedColor = 0;
+  double radius = 0;
 
-  @override
-  void initState() {
-    super.initState();
-
-    final controller = AnimationController(vsync: this)
-      ..repeat(
-        period: const Duration(seconds: 1),
-      );
-
-    animation = CurvedAnimation(parent: controller, curve:  const Cubic(.18,-1.06,0,.43));
-
-  }
+  final colors = const [
+    Colors.red,
+    Colors.blue,
+    Colors.green,
+    Colors.purple,
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: AnimatedBuilder(
-        animation: animation,
-        builder: (_, __) => Transform.rotate(
-          angle: math.pi * animation.value * 2,
-          child: const Icon(
-            Icons.autorenew,
-            size: 100,
+      child: GestureDetector(
+        onTap: () => setState(
+          () {
+            final random = Random();
+            size = (random.nextDouble() + 0.1) * 200;
+            selectedColor = random.nextInt(colors.length);
+            radius = random.nextDouble() * 10;
+          },
+        ),
+        child: AnimatedContainer(
+          width: size,
+          height: size,
+          duration: const Duration(milliseconds: 400),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(radius)),
+            color: colors[selectedColor],
           ),
+          curve: Curves.easeInOut,
         ),
       ),
     );
